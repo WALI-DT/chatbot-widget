@@ -20,34 +20,35 @@ async function sendMessage() {
   chatMessages.appendChild(typingIndicator);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 
-  const res = await fetch("https://abdul-wali.app.n8n.cloud/webhook/ce41d0ab-44ae-4fd8-aeb6-a4a5f51467e8", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message: text })
-  });
+  try {
+    const res = await fetch("https://abdul-wali.app.n8n.cloud/webhook/ce41d0ab-44ae-4fd8-aeb6-a4a5f51467e8", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: text })
+    });
 
-  const data = await res.json();
-  typingIndicator.remove();
-  const formattedReply = marked.parse(data.reply);
-  chatMessages.innerHTML += `<div class="message bot">${formattedReply}</div>`;
+    if (!res.ok) {
+      throw new Error(`Server responded with status: ${res.status}`);
+    }
+
+    const data = await res.json();
+
+    if (!data.reply) {
+      throw new Error("Missing 'reply' field in response.");
+    }
+
+    typingIndicator.remove();
+    const formattedReply = marked.parse(data.reply);
+    chatMessages.innerHTML += `<div class="message bot">${formattedReply}</div>`;
+  } catch (error) {
+    typingIndicator.remove();
+    console.error("Error:", error);
+    chatMessages.innerHTML += `<div class="message bot error">⚠️ There was an error: ${error.message}</div>`;
+  }
+
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-const messageInput = document.getElementById("messageInput");
-
-messageInput.addEventListener("keydown", function (e) {
-  // Reset height to shrink when content is deleted
-  this.style.height = "auto";
-
-  // Expand up to max-height (200px)
-  const maxHeight = 200;
-  const newHeight = Math.min(this.scrollHeight, maxHeight);
-  this.style.height = `${newHeight}px`;
-
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    sendMessage();
-  }
 });
 
 
