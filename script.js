@@ -24,29 +24,27 @@ async function sendMessage() {
     const res = await fetch("https://abdul-wali.app.n8n.cloud/webhook/ce41d0ab-44ae-4fd8-aeb6-a4a5f51467e8", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text })
+      body: JSON.stringify({ message: text }),
     });
 
+    // Check if the response is OK before parsing
     if (!res.ok) {
-      throw new Error(`Server responded with status: ${res.status}`);
+      throw new Error(`Server responded with status ${res.status}`);
     }
 
     const data = await res.json();
-
-    if (!data.reply) {
-      throw new Error("Missing 'reply' field in response.");
-    }
-
     typingIndicator.remove();
+
     const formattedReply = marked.parse(data.reply);
     chatMessages.innerHTML += `<div class="message bot">${formattedReply}</div>`;
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
   } catch (error) {
     typingIndicator.remove();
-    console.error("Error:", error);
-    chatMessages.innerHTML += `<div class="message bot error">⚠️ There was an error: ${error.message}</div>`;
+    chatMessages.innerHTML += `<div class="message bot">⚠️ There was an error connecting to the server. (${error.message})</div>`;
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    console.error("Fetch error:", error);
   }
-
-  chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
 });
