@@ -27,7 +27,6 @@ async function sendMessage() {
       body: JSON.stringify({ message: text }),
     });
 
-    // Check if the response is OK before parsing
     if (!res.ok) {
       throw new Error(`Server responded with status ${res.status}`);
     }
@@ -46,9 +45,6 @@ async function sendMessage() {
     console.error("Fetch error:", error);
   }
 }
-
-});
-
 
 // Close chat if clicked outside
 document.addEventListener("click", function (event) {
